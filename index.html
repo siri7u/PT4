@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script>
+
+    <script src="https://code.iconify.design/1/1.0.4/iconify.min.js"></script>
+
+    <title>Document</title>
+</head>
+
+<body>
+    <style>
+        .center {
+            width: 300px;
+            height: 300px;
+            position: absolute;
+            left: 50%;
+            top: 20%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .box {
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            width: 97%;
+            padding: 0px;
+        }
+        
+        input {
+            outline: none;
+        }
+        
+        textarea {
+            border: none;
+            overflow: auto;
+            outline: none;
+            -webkit-box-shadow: none;
+            -moz-box-shadow: none;
+            box-shadow: none;
+        }
+        
+        .original {
+            position: absolute;
+            width: 98%;
+            margin: 0 auto;
+            padding: 1em;
+            background: #fff;
+            height: 70%;
+            margin: 2px;
+            color: #fff;
+            overflow: auto;
+        }
+        
+        #dummy {
+            color: black;
+        }
+        
+        #board {
+            z-index: 11;
+            background: transparent;
+            color: transparent;
+            caret-color: black;
+        }
+        
+        .original span.highlighted {
+            color: red;
+        }
+        
+        [contenteditable]:focus {
+            outline: 0px solid transparent;
+        }
+        
+        span {}
+    </style>
+
+    <div class="center" style="width: 60%;">
+        <div class="row">
+            <!-- 1 COLONNE-->
+            <div class="col">
+                <!-- Entrée numéro question-->
+                <div class="form-group">
+                    <div class="form-group">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Numéro question</span>
+                            </div>
+                            <input type="text" class="form-control">
+                            <div class="input-group-append">
+                                <span class="input-group-text">/25</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Carte-->
+                <div class="card border-primary mb-3" style="padding-bottom: 0px; margin-bottom: 0px">
+                    <div class="card-header">
+                        <span class="iconify" data-icon="mdi:console-line" data-inline="false"></span> Console de code
+                    </div>
+
+                    <div class="card-body" style="height: 12em">
+                        <div id="board" class="original" contenteditable="true" style="reset"></div>
+                        <div id="dummy" class="original"></div>
+                    </div>
+                </div>
+
+                <!--Bouton-->
+                <button type="button" class="btn btn-primary" id="soumettre">Soumettre</button>
+
+            </div>
+            <!-- 1 COLONNE-->
+
+
+            <!-- 2 COLONNE-->
+            <div class="list-group" style="width: 40%;">
+
+                <a href="#" class="list-group-item list-group-item-action active">
+                  Correction
+                </a>
+
+
+            </div>
+
+            <!-- 2 COLONNE-->
+
+
+
+        </div>
+    </div>
+
+
+    <script>
+        var highLightedWord = ["select", "insert", "update", "from", "where", "case", "when", "else", "end", "and"];
+        var regexFromMyArray = new RegExp(highLightedWord.join("|"), 'ig');
+
+        $('#board').keyup(function(event) {
+            document.getElementById('dummy').innerHTML = $('#board').html().replace(regexFromMyArray, function(str) {
+                return '<span class="highlighted">' + str + '</span>'
+            })
+        })
+
+        var target = $("#dummy");
+
+        $("#board").scroll(function() {
+            target.prop("scrollTop", this.scrollTop)
+                .pr
+            op("scrollLeft", this.scrollLeft);
+        });
+    </script>
+
+
+    <script src="regles.js"></script>
+
+    <script>
+        $(document).ready(function() {
+
+
+            var regles = [{
+                    "nom": "select *",
+                    "regExps": new RegExp(/select\s\*/i),
+                    "feedbackVrai": "Contient le bon select",
+                    "feedbackFaux": "Ne contient pas le bon select",
+                    "poids": -1
+                }, {
+                    "nom": "from pil",
+                    "regExps": new RegExp(/from ['|"]?pil['|"]?(?!\S)/i),
+                    "feedbackVrai": "Contient le bon from",
+                    "feedbackFaux": "Ne contient pas le bon from",
+                    "poids": 1
+                },
+
+
+            ];
+
+            $("#soumettre").click(function() {
+
+                var text = $('#dummy').text();
+
+                console.log(text);
+
+                //boucle sur toutes les rêgeles
+                for (i = 0; i < Object.keys(regles).length; i++) {
+
+                    if (text.match(regles[i].regExps)) {
+
+                        $(".list-group").append(`
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <span class="iconify" data-icon="emojione:check-mark-button" data-inline="false"></span>` + regles[i].feedbackVrai + `
+                            </a>
+                        `);
+
+                    } else {
+
+                        $(".list-group").append(`
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <span class="iconify" data-icon="emojione-v1:cross-mark" data-inline="false"></span>  ` + regles[i].feedbackFaux + `       
+                            </a>
+                        `);
+                    }
+                }
+            });
+        });
+    </script>
+
+
+
+</body>
+
+</html>
