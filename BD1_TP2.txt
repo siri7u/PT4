@@ -1,0 +1,48 @@
+﻿// contient les 10 premières questions de du tp2 de bd1
+// ansi que les réponses
+
+1. Donner toutes les informations sur les pilotes
+SELECT *
+	FROM pil
+
+2. Donner le nom et l�adresse des pilotes
+	SELECT nompil, adresse1, adresse2 
+	FROM pil
+
+3. L’identifiant et le nom de chaque pilote par ordre alphabétique
+    SELECT id, nompil 
+    FROM pil 
+    ORDER BY nompil
+
+4.Le nom et la capacité de chacun des avions
+    SELECT nomav, capacite 
+    FROM avion
+
+5. Le nom des villes d’où part au moins un vol
+    SELECT DISTINCT villedep 
+    FROM vol 
+    WHERE 1
+
+6. Les villes qui sont reliées par au moins un vol
+    SELECT DISTINCT villedep, villearr 
+    FROM vol  
+
+7. Noms de pilotes qui habitent à Nice ou qui gagnent plus de 2300 Euros :
+    SELECT nompil 
+    FROM pil
+    WHERE adresse2 = 'Nice' OR salaire > 2300
+
+8. Liste des avions de nom A310, A320 et A330 :
+    SELECT * 
+    FROM avion 
+    WHERE nomav = 'A310' or nomav = 'A320' or nomav = 'A330' 
+
+9. Noms des pilotes qui gagnent entre 2300 Euros et 3500 Euros inclus
+    SELECT nompil 
+    FROM pil
+    WHERE 2300<salaire<3500 
+
+10. La liste des vols au départ de Nice desservant Paris :
+    SELECT * 
+    FROM vol 
+    WHERE villedep = 'Nice' and villearr = 'Paris' 

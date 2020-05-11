@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script>
+    <script src="https://code.iconify.design/1/1.0.4/iconify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.6/ace.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js"></script>
+    <title>SQL Code autocorrection</title>
+</head>
+
+<body>
+    <br><br>
+
+    <!-- Fenêtre principale, cette div peut être facilement transportable sur un autre site-->
+    <div class="container" style="background-color: #e5e5e5;">
+
+        <br>
+        <!-- Boutons selectionner questions-->
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <div class="d-flex flex-wrap question-button-holder">
+
+            </div>
+        </div>
+
+        <br><br>
+
+        <h4 class="question">Selectionner une question</h4>
+
+        <!-- Importation des questions-->
+        <script src="questions.js"></script>
+
+        <!-- Gestion des boutons choix questions-->
+        <script>
+            console.log(questions);
+
+            //affichage de tous les boutons pour les questions.
+            for (var i = 0; i < Object.keys(questions).length; i++) {
+                $('.question-button-holder').append(`
+                    <a class="page-link" href="#" onclick="btnqtn(` + (i) + `)">` + (i + 1) + `</a>
+                `);
+            }
+
+            //gère le click de chaque boutons
+            function btnqtn(i) {
+                console.log("event");
+                //on affiche la question
+                $('.question').empty();
+                $('.question').append(questions[i].description);
+                //toutes les rêgles de la question sont selectionnées
+                regles = questions[i].regles;
+
+                //affichage de la correction dans la div cachée
+                $('.modal-body').empty();
+
+                for (var j = 0; j < regles["length"]; j++) {
+                    console.log(regles["length"])
+                    console.log(regles[j].nom);
+                    $('.modal-body').append(`
+                        <p> ` + regles[j].nom + `</p>
+                    `);
+                }
+
+            }
+        </script>
+
+        <br>
+
+        <div class="row">
+
+            <!-- COL 1-->
+            <div class="col">
+
+                <!--Editeur ACE-->
+                <div id="editor1_wrapper" class="app_editor_wrapper">
+                    <div id="editor1" class="app_editor">SELECT FROM WHERE</div>
+                </div>
+                <script src="gestionEditeur.js"></script>
+
+                <br>
+
+                <!--Bouton soumettre-->
+                <button type="button" class="btn btn-primary" id="soumettre">
+                    <span class="iconify" data-icon="bx:bx-code-alt" data-inline="false" style="vertical-align: middle;"></span> Soumettre
+                </button>
+
+                <!-- Bouton correction ( trigger modal ) -->
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+                    Afficher la correction
+                </button>
+
+            </div>
+            <!---->
+
+
+            <!-- COL2-->
+            <div class="list-group" style="width: 40%; padding-right:15px">
+                <a href="#" class="list-group-item list-group-item-action active">Correction</a>
+                <div class="correction-holder"></div>
+            </div>
+
+
+        </div> <br>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+
+            $("#soumettre").click(function() {
+                var text = aceEditorInstance.getValue();
+                $(".correction-holder").empty();
+                //si on n'a pas selectionné de question
+                if (typeof regles === 'undefined') {
+                    $(".correction-holder").append(`
+                            <a href="#" class="list-group-item list-group-item-action">
+                                Selectionner une question avant de soumettre
+                            </a>
+                        `);
+
+                    //cas où on a déjà selectionné une question
+                } else {
+                    //boucle sur toutes les rêgeles
+                    for (i = 0; i < Object.keys(regles).length; i++) {
+                        //lorsque la rêgle est vrai
+                        if (text.match(regles[i].regExps)) {
+                            $(".correction-holder").append(`
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <span class="iconify" data-icon="emojione:check-mark-button" data-inline="false"></span>` + " " + regles[i].feedbackVrai + `
+                                </a>
+                             `);
+                            //lorsque la rêgle est fausse
+                        } else {
+                            $(".correction-holder").append(`
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <span class="iconify" data-icon="emojione-v1:cross-mark" data-inline="false"></span>  ` + " " + regles[i].feedbackFaux + `       
+                                </a>
+                            `);
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+    <!-- Modal cachée au début -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Correction</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+                </div>
+                <div class="modal-body">
+                    Selectionnez une question avant d'afficher la correction
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
